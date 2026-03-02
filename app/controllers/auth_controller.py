@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, flash
 from app.forms.auth_from import LoginForm
-from app.models.user_model import User
+from app.models.auth_model import User
 from app import db
 
 def login():
