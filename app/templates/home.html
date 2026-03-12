@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Categories Navigation -->
+<div class="mb-5 overflow-auto pb-2" style="white-space: nowrap;">
+    <a href="{{ url_for('main.home') }}" class="btn btn-sm btn-outline-danger active rounded-pill me-2 px-4 shadow-sm">All</a>
+    {% for cat in categories %}
+    <a href="{{ url_for('main.category_filter', cat_id=cat.id) }}" class="btn btn-sm btn-outline-secondary rounded-pill me-2 px-4">{{ cat.name }}</a>
+    {% endfor %}
+</div>
+
+<!-- Featured Section -->
+{% if featured %}
+<h3 class="section-title">Featured Content</h3>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+    {% for movie in featured %}
+    <div class="col">
+        <div class="card h-100 shadow border-0 position-relative">
+            <span class="badge-ott">FEATURED</span>
+            <img src="{{ movie.thumbnail }}" class="card-img" alt="{{ movie.title }}" style="height: 350px; object-fit: cover; opacity: 0.7;">
+            <div class="card-img-overlay d-flex flex-column justify-content-end bg-gradient-to-t from-black via-transparent">
+                <h4 class="fw-bold mb-1">{{ movie.title }}</h4>
+                <p class="small text-light mb-2">{{ movie.release_year }} | {{ movie.category_name }}</p>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('movie.movie_details', movie_id=movie.id) }}" class="btn btn-danger btn-sm px-4">Watch Now</a>
+                    <button class="btn btn-light btn-sm"><i class="fas fa-plus"></i> List</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Trending Section -->
+{% if trending %}
+<h3 class="section-title">Trending Now</h3>
+<div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3 mb-5">
+    {% for movie in trending %}
+    <div class="col">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="position-relative">
+                <img src="{{ movie.thumbnail }}" class="card-img-top" alt="{{ movie.title }}" style="height: 240px; object-fit: cover;">
+                <div class="card-img-overlay d-flex align-items-center justify-content-center opacity-0 hover-opacity-100 bg-dark bg-opacity-50">
+                    <a href="{{ url_for('movie.movie_details', movie_id=movie.id) }}" class="btn btn-danger btn-sm rounded-circle p-2 px-3">
+                        <i class="fas fa-play"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-2">
+                <h6 class="card-title text-truncate mb-0">{{ movie.title }}</h6>
+                <small class="text-muted">{{ movie.category_name }}</small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Latest Movies -->
+<h3 class="section-title">Recently Added</h3>
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+    {% for movie in latest %}
+    <div class="col">
+        <div class="card h-100 shadow">
+            <img src="{{ movie.thumbnail }}" class="card-img-top" alt="{{ movie.title }}" style="height: 200px; object-fit: cover;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="card-title text-truncate mb-1" style="max-width: 150px;">{{ movie.title }}</h5>
+                        <p class="text-muted small mb-0">{{ movie.category_name }} ({{ movie.release_year }})</p>
+                    </div>
+                    <span class="badge bg-secondary small">{{ movie.language }}</span>
+                </div>
+                <hr class="border-secondary">
+                <a href="{{ url_for('movie.movie_details', movie_id=movie.id) }}" class="btn btn-outline-danger btn-sm w-100">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="p-5 border border-secondary border-dashed rounded bg-dark bg-opacity-25">
+            <i class="fas fa-film fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No movies match your search.</h4>
+            <a href="{{ url_for('main.home') }}" class="btn btn-outline-light mt-2">Clear Search</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .hover-opacity-100:hover {
+        opacity: 1 !important;
+        transition: opacity 0.3s;
+    }
+    .bg-gradient-to-t {
+        background: linear-gradient(to top, rgba(0,0,0,1), transparent);
+    }
+</style>
+{% endblock %}

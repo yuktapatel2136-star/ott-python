@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Add Movie{% endblock %}
+
+{% block content %}
+<div class="row pt-4 justify-content-center">
+    <div class="col-md-10">
+        <div class="card bg-dark shadow p-4 border border-secondary">
+            <h2 class="mb-4 text-danger fw-bold"><i class="fas fa-plus-circle me-2"></i>Add New Content</h2>
+            
+            <!-- IMPORTANT: enctype must be multipart for file uploads -->
+            <form method="POST" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Movie/Series Title</label>
+                        <input type="text" name="title" class="form-control bg-black text-white border-secondary" required placeholder="Enter title">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Category (Genre/Type)</label>
+                        <select name="category_id" class="form-select bg-black text-white border-secondary" required>
+                            <option value="">Select Category</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }} ({{ cat.type }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Language</label>
+                        <input type="text" name="language" class="form-control bg-black text-white border-secondary" placeholder="English, Hindi, etc.">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Release Year</label>
+                        <input type="number" name="year" class="form-control bg-black text-white border-secondary" placeholder="2024">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Description / Plot</label>
+                        <textarea name="description" class="form-control bg-black text-white border-secondary" rows="4" required placeholder="Enter movie description..."></textarea>
+                    </div>
+
+                    <!-- Poster Image Upload -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold"><i class="fas fa-image me-2 text-info"></i>Poster Image</label>
+                        <input type="file" name="image_file" id="image_file" 
+                               class="form-control bg-black text-white border-secondary" 
+                               accept=".png,.jpg,.jpeg,.gif,.webp" required>
+                        <small class="text-muted">Allowed: JPG, PNG, GIF, WEBP</small>
+                        <!-- Preview Box -->
+                        <div id="image_preview_box" class="mt-2 d-none">
+                            <img id="image_preview" src="" alt="Poster Preview" 
+                                 class="img-fluid rounded border border-secondary shadow" 
+                                 style="max-height: 200px; object-fit: cover;">
+                        </div>
+                    </div>
+
+                    <!-- Video File Upload -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold"><i class="fas fa-film me-2 text-success"></i>Video File</label>
+                        <input type="file" name="video_file" id="video_file" 
+                               class="form-control bg-black text-white border-secondary" 
+                               accept=".mp4,.webm,.mkv,.avi" required>
+                        <small class="text-muted">Allowed: MP4, WEBM, MKV, AVI</small>
+                        <!-- Video Info -->
+                        <div id="video_info" class="mt-2 d-none">
+                            <div class="alert alert-success py-2 px-3 mb-0">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <span id="video_name" class="small fw-bold"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card bg-black p-3 border-secondary">
+                            <h6 class="text-muted mb-3">Display Options</h6>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_featured" id="is_featured">
+                                    <label class="form-check-label" for="is_featured">Featured on Home</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_trending" id="is_trending">
+                                    <label class="form-check-label" for="is_trending">Mark as Trending</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4 text-end">
+                        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary px-4 me-2">Cancel</a>
+                        <button type="submit" class="btn btn-danger px-5 py-2 fw-bold">
+                            <i class="fas fa-upload me-2"></i>Publish Content
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Image Preview
+    document.getElementById('image_file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById('image_preview').src = evt.target.result;
+                document.getElementById('image_preview_box').classList.remove('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Video File Name Display
+    document.getElementById('video_file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            document.getElementById('video_name').textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)';
+            document.getElementById('video_info').classList.remove('d-none');
+        }
+    });
+</script>
+{% endblock %}

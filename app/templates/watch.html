@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Watching {{ movie.title }}{% endblock %}
+
+{% block content %}
+<div class="row pt-4">
+    <div class="col-lg-9 mx-auto">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent p-0 mb-4">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}" class="text-danger">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('movie.movie_details', movie_id=movie.id) }}" class="text-danger">{{ movie.title }}</a></li>
+                <li class="breadcrumb-item active text-light" aria-current="page">Watching</li>
+            </ol>
+        </nav>
+        
+        <div class="card bg-black shadow-lg rounded-4 overflow-hidden mb-4">
+            <div class="ratio ratio-16x9">
+                <video id="player" controls controlsList="nodownload" class="w-100">
+                    <source src="{{ movie.video_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="card-body bg-dark border-top border-secondary py-3 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0 fw-bold">{{ movie.title }}</h4>
+                    <p class="text-muted small mb-0">{{ movie.category_name }} | {{ movie.language }}</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-light btn-sm"><i class="fas fa-closed-captioning"></i></button>
+                    <button class="btn btn-outline-light btn-sm ms-2"><i class="fas fa-cog"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-5">
+            <h5 class="fw-bold mb-3 border-bottom border-secondary pb-2">Movie Summary</h5>
+            <p class="text-muted lead pb-4">{{ movie.description }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const video = document.getElementById('player');
+    const movieId = parseInt("{{ movie.id }}");
+    const savedTime = parseFloat("{{ (history.resume_time or 0) }}");
+
+    // Resume from last point
+    if (savedTime > 0) {
+        if (confirm("Would you like to resume from where you left off? (" + Math.floor(savedTime/60) + ":" + Math.floor(savedTime%60).toString().padStart(2, '0') + ")")) {
+            video.currentTime = savedTime;
+        }
+    }
+
+    // Save progress periodically
+    let lastSave = 0;
+    video.addEventListener('timeupdate', () => {
+        const currentTime = video.currentTime;
+        // Save every 10 seconds to avoid too many requests
+        if (Math.abs(currentTime - lastSave) > 10) {
+            fetch(`/update_resume_point/${movieId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ resume_time: currentTime })
+            });
+            lastSave = currentTime;
+        }
+    });
+
+    // Save on close/navigate
+    window.addEventListener('beforeunload', () => {
+        fetch(`/update_resume_point/${movieId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ resume_time: video.currentTime }),
+            keepalive: true
+        });
+    });
+</script>
+{% endblock %}

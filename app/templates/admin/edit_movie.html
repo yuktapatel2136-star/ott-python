@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Edit Movie{% endblock %}
+
+{% block content %}
+<div class="row pt-4 justify-content-center">
+    <div class="col-md-10">
+        <div class="card bg-dark shadow p-4 border border-secondary">
+            <h2 class="mb-4 text-warning fw-bold"><i class="fas fa-edit me-2"></i>Edit: {{ movie.title }}</h2>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Title</label>
+                        <input type="text" name="title" class="form-control bg-black text-white border-secondary" required value="{{ movie.title }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Category</label>
+                        <select name="category_id" class="form-select bg-black text-white border-secondary">
+                            <option value="">Select Category</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if movie.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Language</label>
+                        <input type="text" name="language" class="form-control bg-black text-white border-secondary" value="{{ movie.language }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Release Year</label>
+                        <input type="number" name="year" class="form-control bg-black text-white border-secondary" value="{{ movie.release_year }}">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control bg-black text-white border-secondary" rows="4" required>{{ movie.description }}</textarea>
+                    </div>
+
+                    <!-- Current Poster Preview + New Upload -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold"><i class="fas fa-image me-2 text-info"></i>Poster Image</label>
+                        <div class="mb-2">
+                            <p class="text-muted small mb-1">Current Poster:</p>
+                            <img id="current_image" src="{{ movie.thumbnail }}" alt="Current Poster" 
+                                 class="img-fluid rounded border border-secondary shadow" 
+                                 style="max-height: 150px; object-fit: cover;">
+                        </div>
+                        <input type="file" name="image_file" id="image_file"
+                               class="form-control bg-black text-white border-secondary"
+                               accept=".png,.jpg,.jpeg,.gif,.webp">
+                        <small class="text-muted">Leave empty to keep current poster. Allowed: JPG, PNG, GIF, WEBP</small>
+                    </div>
+
+                    <!-- Current Video Info + New Upload -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold"><i class="fas fa-film me-2 text-success"></i>Video File</label>
+                        <div class="mb-2">
+                            <p class="text-muted small mb-1">Current Video:</p>
+                            <div class="alert alert-secondary py-2 px-3 mb-0">
+                                <i class="fas fa-film me-2"></i>
+                                <small class="text-break">{{ movie.video_url.split('/')[-1] }}</small>
+                            </div>
+                        </div>
+                        <input type="file" name="video_file" id="video_file"
+                               class="form-control bg-black text-white border-secondary"
+                               accept=".mp4,.webm,.mkv,.avi">
+                        <small class="text-muted">Leave empty to keep current video. Allowed: MP4, WEBM, MKV, AVI</small>
+                        <div id="video_info" class="mt-2 d-none">
+                            <div class="alert alert-success py-2 px-3 mb-0">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <span id="video_name" class="small fw-bold"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card bg-black p-3 border-secondary">
+                            <h6 class="text-muted mb-3">Display Options</h6>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_featured" id="is_featured" {% if movie.is_featured %}checked{% endif %}>
+                                    <label class="form-check-label" for="is_featured">Featured on Home</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_trending" id="is_trending" {% if movie.is_trending %}checked{% endif %}>
+                                    <label class="form-check-label" for="is_trending">Mark as Trending</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4 text-end">
+                        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary px-4 me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-5 py-2 fw-bold text-white">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Image Preview on new upload
+    document.getElementById('image_file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById('current_image').src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Video File Name Display
+    document.getElementById('video_file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            document.getElementById('video_name').textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)';
+            document.getElementById('video_info').classList.remove('d-none');
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }}{% endblock %}
+
+{% block content %}
+<div class="row pt-4 mb-4">
+    <div class="col">
+        <h2 class="fw-bold"><i class="fas fa-tag text-danger me-2"></i>Category: {{ category.name }}</h2>
+        <p class="text-muted">Exploring all {{ category.type }} content</p>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+    {% for movie in movies %}
+    <div class="col">
+        <div class="card h-100 shadow">
+            <img src="{{ movie.thumbnail }}" class="card-img-top" alt="{{ movie.title }}" style="height: 200px; object-fit: cover;">
+            <div class="card-body">
+                <h5 class="card-title text-truncate">{{ movie.title }}</h5>
+                <p class="text-muted small">{{ movie.release_year }} | {{ movie.language }}</p>
+                <a href="{{ url_for('movie.movie_details', movie_id=movie.id) }}" class="btn btn-outline-danger btn-sm w-100">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <h4>No movies in this category yet.</h4>
+        <a href="{{ url_for('main.home') }}" class="btn btn-outline-light mt-3">Browse Other Content</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

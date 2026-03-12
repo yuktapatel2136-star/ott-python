@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Results for "{{ query }}"{% endblock %}
+
+{% block content %}
+<div class="row pt-4 mb-4">
+    <div class="col">
+        <h2 class="fw-bold">Search Results for: <span class="text-danger">"{{ query }}"</span></h2>
+        <p class="text-muted">{{ movies|length }} results found</p>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+    {% for movie in movies %}
+    <div class="col">
+        <div class="card h-100 shadow">
+            <img src="{{ movie.thumbnail }}" class="card-img-top" alt="{{ movie.title }}" style="height: 200px; object-fit: cover;">
+            <div class="card-body">
+                <h5 class="card-title text-truncate">{{ movie.title }}</h5>
+                <p class="text-muted small">{{ movie.category_name }} | {{ movie.release_year }}</p>
+                <a href="{{ url_for('movie.movie_details', movie_id=movie.id) }}" class="btn btn-outline-danger btn-sm w-100">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+        <h4>No matches found.</h4>
+        <a href="{{ url_for('main.home') }}" class="btn btn-danger mt-3">Back to Home</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

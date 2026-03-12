@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ movie.title }}{% endblock %}
+
+{% block content %}
+<div class="row pt-4 g-lg-5">
+    <!-- Movie Poster -->
+    <div class="col-md-4 mb-4 mb-md-0">
+        <div class="position-relative shadow-lg rounded-4 overflow-hidden">
+            <img src="{{ movie.thumbnail }}" class="img-fluid w-100" alt="{{ movie.title }}" style="min-height: 450px; object-fit: cover;">
+            <div class="position-absolute top-0 start-0 m-3">
+                <span class="badge bg-danger px-3 py-2 shadow">{{ movie.category_name }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movie Details -->
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h1 class="display-4 fw-bold mb-0">{{ movie.title }}</h1>
+            <div class="text-warning h4 mb-0">
+                <i class="fas fa-star me-1"></i>4.5 <small class="text-muted fs-6">(Avg)</small>
+            </div>
+        </div>
+        
+        <div class="d-flex gap-3 text-muted mb-4 align-items-center">
+            <span><i class="far fa-calendar-alt me-1"></i>{{ movie.release_year }}</span>
+            <span>|</span>
+            <span><i class="fas fa-globe me-1"></i>{{ movie.language }}</span>
+            <span>|</span>
+            <span class="text-success fw-bold"><i class="fas fa-eye me-1"></i>{{ movie.views }} Views</span>
+        </div>
+
+        <p class="lead text-light opacity-75 mb-4" style="line-height: 1.8;">
+            {{ movie.description }}
+        </p>
+
+        <div class="d-flex flex-wrap gap-3 mb-5">
+            <a href="{{ url_for('movie.watch', movie_id=movie.id) }}" class="btn btn-danger btn-lg px-5 py-3 shadow">
+                <i class="fas fa-play me-2"></i>WATCH NOW
+            </a>
+            <a href="{{ url_for('movie.download', movie_id=movie.id) }}" class="btn btn-outline-light btn-lg px-4 py-3">
+                <i class="fas fa-download me-2"></i>DOWNLOAD
+            </a>
+            <button class="btn btn-dark btn-lg px-4 py-3 border border-secondary shadow-sm">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+
+        <!-- Rating Section -->
+        <div class="card bg-dark border-secondary shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Rate this Content</h5>
+                <form action="{{ url_for('movie.rate_movie', movie_id=movie.id) }}" method="POST" class="row g-2 align-items-center">
+                    <div class="col-auto">
+                        <select name="score" class="form-select bg-black text-white border-secondary">
+                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                            <option value="4">⭐⭐⭐⭐ Very Good</option>
+                            <option value="3">⭐⭐⭐ Good</option>
+                            <option value="2">⭐⭐ Fair</option>
+                            <option value="1">⭐ Poor</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-danger shadow-sm">Post Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Related Suggestions (Optional) -->
+<div class="mt-5 pt-5">
+    <h3 class="section-title">Similar Content</h3>
+    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
+        <!-- Mockup similar movies -->
+        <div class="col"><div class="card bg-dark aspect-ratio-2x3 border-0 rounded-3 shadow-sm opacity-50"></div></div>
+        <div class="col"><div class="card bg-dark aspect-ratio-2x3 border-0 rounded-3 shadow-sm opacity-50"></div></div>
+        <div class="col"><div class="card bg-dark aspect-ratio-2x3 border-0 rounded-3 shadow-sm opacity-50"></div></div>
+        <div class="col"><div class="card bg-dark aspect-ratio-2x3 border-0 rounded-3 shadow-sm opacity-50"></div></div>
+    </div>
+</div>
+{% endblock %}
