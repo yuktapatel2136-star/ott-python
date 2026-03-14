@@ -209,3 +209,58 @@ def delete_category(cat_id):
     db.session.commit()
     flash('Category deleted!', 'info')
     return redirect(url_for('admin.manage_categories'))
+
+# ── User Management ──────────────────────────────────────────────────────────
+
+@admin_bp.route('/admin/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email    = request.form.get('email', '').strip()
+        role     = request.form.get('role', 'user')
+        is_subscribed = 'is_subscribed' in request.form
+
+        # Check uniqueness (exclude current user)
+        existing_username = User.query.filter(User.username == username, User.id != user_id).first()
+        existing_email    = User.query.filter(User.email == email,    User.id != user_id).first()
+
+        if existing_username:
+            flash('Username already taken by another user.', 'danger')
+            return render_template('admin/edit_user.html', user=user)
+        if existing_email:
+            flash('Email already in use by another user.', 'danger')
+            return render_template('admin/edit_user.html', user=user)
+
+        user.username     = username
+        user.email        = email
+        user.role         = role
+        user.is_subscribed = is_subscribed
+
+        # Optional password reset
+        new_password = request.form.get('new_password', '').strip()
+        if new_password:
+            user.set_password(new_password)
+
+        db.session.commit()
+        flash(f'User "{user.username}" updated successfully!', 'success')
+        return redirect(url_for('admin.dashboard'))
+
+    return render_template('admin/edit_user.html', user=user)
+
+
+@admin_bp.route('/admin/delete_user/<int:user_id>')
+@login_required
+@admin_required
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('Aap apna account delete nahi kar sakte!', 'warning')
+        return redirect(url_for('admin.dashboard'))
+    username = user.username
+    db.session.delete(user)
+    db.session.commit()
+    flash(f'User "{username}" deleted successfully!', 'info')
+    return redirect(url_for('admin.dashboard'))

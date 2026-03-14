@@ -7,7 +7,8 @@
         <h1 class="fw-bold"><i class="fas fa-chart-line text-danger me-2"></i>Dashboard</h1>
     </div>
     <div class="col-md-6 text-end d-flex justify-content-end gap-2">
-        <a href="{{ url_for('admin.manage_categories') }}" class="btn btn-outline-light"><i class="fas fa-tags me-2"></i>Categories</a>
+        <a href="{{ url_for('admin.manage_categories') }}" class="btn btn-outline-light"><i
+                class="fas fa-tags me-2"></i>Categories</a>
         <a href="{{ url_for('admin.add_movie') }}" class="btn btn-danger"><i class="fas fa-plus me-2"></i>Add Movie</a>
     </div>
 </div>
@@ -83,21 +84,28 @@
                     <tbody>
                         {% for movie in movies %}
                         <tr>
-                            <td><img src="{{ movie.thumbnail }}" class="rounded shadow-sm" style="height: 40px; width: 60px; object-fit: cover;"></td>
+                            <td><img src="{{ movie.thumbnail }}" class="rounded shadow-sm"
+                                    style="height: 40px; width: 60px; object-fit: cover;"></td>
                             <td>
                                 <div class="fw-bold">{{ movie.title }}</div>
                                 <small class="text-muted">{{ movie.views }} views</small>
                             </td>
-                            <td><span class="badge bg-outline-info border text-info">{{ movie.category_name }}</span></td>
+                            <td><span class="badge bg-outline-info border text-info">{{ movie.category_name }}</span>
+                            </td>
                             <td>{{ movie.release_year }}</td>
                             <td>
-                                {% if movie.is_featured %}<span class="text-warning"><i class="fas fa-star me-1"></i>F</span>{% endif %}
-                                {% if movie.is_trending %}<span class="text-primary ms-2"><i class="fas fa-fire me-1"></i>T</span>{% endif %}
+                                {% if movie.is_featured %}<span class="text-warning"><i
+                                        class="fas fa-star me-1"></i>F</span>{% endif %}
+                                {% if movie.is_trending %}<span class="text-primary ms-2"><i
+                                        class="fas fa-fire me-1"></i>T</span>{% endif %}
                             </td>
                             <td>
                                 <div class="btn-group">
-                                    <a href="{{ url_for('admin.edit_movie', movie_id=movie.id) }}" class="btn btn-sm btn-outline-light"><i class="fas fa-edit"></i></a>
-                                    <a href="{{ url_for('admin.delete_movie', movie_id=movie.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete?')"><i class="fas fa-trash"></i></a>
+                                    <a href="{{ url_for('admin.edit_movie', movie_id=movie.id) }}"
+                                        class="btn btn-sm btn-outline-light"><i class="fas fa-edit"></i></a>
+                                    <a href="{{ url_for('admin.delete_movie', movie_id=movie.id) }}"
+                                        class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete?')"><i
+                                            class="fas fa-trash"></i></a>
                                 </div>
                             </td>
                         </tr>
@@ -117,7 +125,8 @@
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
                     {% for movie in most_watched %}
-                    <li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center py-3">
+                    <li
+                        class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center py-3">
                         <div class="d-flex align-items-center">
                             <span class="fs-4 fw-bold text-muted me-3">#{{ loop.index }}</span>
                             <div>
@@ -132,23 +141,74 @@
             </div>
         </div>
 
-        <div class="card bg-dark shadow">
-            <div class="card-header bg-black py-3">
-                <h5 class="mb-0">User Subscriptions</h5>
+
+    </div>
+</div>
+
+<!-- Users Management Table -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-dark shadow p-0 overflow-hidden">
+            <div class="card-header bg-black py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-users me-2 text-primary"></i>User Management</h5>
+                <span class="badge bg-primary">{{ total_users }} Total</span>
             </div>
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="flex-grow-1">
-                        <div class="progress" style="height: 10px;">
-                            <div id="sub-progress-bar" class="progress-bar bg-success"></div>
-                        </div>
-                        <script>document.getElementById('sub-progress-bar').style.width = "{{ sub_percent }}%";</script>
-                    </div>
-                </div>
-                <p class="text-muted small">
-                    <i class="fas fa-info-circle me-1"></i> 
-                    {{ subscribed_users }} out of {{ total_users }} users have an active premium plan.
-                </p>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0 align-middle">
+                    <thead class="bg-secondary bg-opacity-10">
+                        <tr>
+                            <th>#</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Subscription</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td class="text-muted small">{{ u.id }}</td>
+                            <td class="fw-bold">{{ u.username }}</td>
+                            <td class="text-muted small">{{ u.email }}</td>
+                            <td>
+                                {% if u.role == 'admin' %}
+                                <span class="badge bg-danger">Admin</span>
+                                {% else %}
+                                <span class="badge bg-secondary">User</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if u.is_subscribed %}
+                                <span class="badge bg-success"><i class="fas fa-crown me-1"></i>Premium</span>
+                                {% else %}
+                                <span class="badge bg-outline-secondary border text-secondary">Free</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ url_for('admin.edit_user', user_id=u.id) }}"
+                                        class="btn btn-sm btn-outline-primary" title="Edit User">
+                                        <i class="fas fa-user-edit"></i>
+                                    </a>
+                                    {% if u.id != current_user.id %}
+                                    <a href="{{ url_for('admin.delete_user', user_id=u.id) }}"
+                                        class="btn btn-sm btn-outline-danger" title="Delete User"
+                                        onclick="return confirm('Are you sure you want to delete user \'{{ u.username }}\'?')">
+                                        <i class="fas fa-user-times"></i>
+                                    </a>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary" disabled
+                                        title="Cannot delete yourself">
+                                        <i class="fas fa-user-times"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
