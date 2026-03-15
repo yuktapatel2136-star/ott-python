@@ -43,12 +43,11 @@ def dashboard():
     movies = Movie.query.all()
     users = User.query.all()
     
-    # Simple metrics
     most_watched = Movie.query.order_by(Movie.views.desc()).limit(5).all()
     subscribed_users = User.query.filter_by(is_subscribed=True).count()
     simulated_revenue = subscribed_users * 499 
     
-    # Calculate percentage safely
+    # Calculate percentage
     sub_percent = round((subscribed_users / total_users * 100), 1) if total_users > 0 else 0
     
     return render_template('admin/dashboard.html', 
@@ -62,6 +61,7 @@ def dashboard():
                          movies=movies, 
                          users=users)
 
+##### Add Movie
 @admin_bp.route('/admin/add_movie', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -123,6 +123,7 @@ def add_movie():
         
     return render_template('admin/add_movie.html', categories=categories)
 
+### Edit Movie
 @admin_bp.route('/admin/edit_movie/<int:movie_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -138,7 +139,7 @@ def edit_movie(movie_id):
         movie.is_featured = 'is_featured' in request.form
         movie.is_trending = 'is_trending' in request.form
         
-        # Handle new image upload (optional - keep existing if none uploaded)
+        # Handle new image upload
         image_file = request.files.get('image_file')
         if image_file and image_file.filename != '':
             if allowed_image(image_file.filename):
@@ -148,7 +149,7 @@ def edit_movie(movie_id):
                 flash('Invalid image format!', 'danger')
                 return render_template('admin/edit_movie.html', movie=movie, categories=categories)
 
-        # Handle new video upload (optional - keep existing if none uploaded)
+        # Handle new video upload
         video_file = request.files.get('video_file')
         if video_file and video_file.filename != '':
             if allowed_video(video_file.filename):
@@ -167,6 +168,7 @@ def edit_movie(movie_id):
         
     return render_template('admin/edit_movie.html', movie=movie, categories=categories)
 
+### Delete Movie
 @admin_bp.route('/admin/delete_movie/<int:movie_id>')
 @login_required
 @admin_required
@@ -184,6 +186,7 @@ def delete_movie(movie_id):
     flash(f'"{title}" deleted successfully!', 'info')
     return redirect(url_for('admin.dashboard'))
 
+### Add Categories
 @admin_bp.route('/admin/categories', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -200,6 +203,7 @@ def manage_categories():
     categories = Category.query.all()
     return render_template('admin/categories.html', categories=categories)
 
+### Delete Categories
 @admin_bp.route('/admin/delete_category/<int:cat_id>')
 @login_required
 @admin_required
@@ -210,8 +214,7 @@ def delete_category(cat_id):
     flash('Category deleted!', 'info')
     return redirect(url_for('admin.manage_categories'))
 
-# ── User Management ──────────────────────────────────────────────────────────
-
+### User Management
 @admin_bp.route('/admin/edit_user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required

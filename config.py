@@ -7,7 +7,6 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'premium-streaming-secret-key-123'
     
     # Database configuration for MySQL
-    # Note: '@' in password must be escaped as '%40'
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:yukt%402006@localhost/database'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

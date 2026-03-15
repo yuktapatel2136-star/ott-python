@@ -38,7 +38,7 @@ class Movie(db.Model):
     video_url = db.Column(db.String(200), nullable=False) 
     thumbnail = db.Column(db.String(200), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
-    category_name = db.Column(db.String(50)) # For backward compatibility/simplicity
+    category_name = db.Column(db.String(50)) 
     language = db.Column(db.String(30))
     release_year = db.Column(db.Integer)
     is_featured = db.Column(db.Boolean, default=False)
