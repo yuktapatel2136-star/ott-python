@@ -28,7 +28,7 @@ def register():
         new_user = User(username=username, email=email)
         new_user.set_password(password)
         
-        # First user is admin (simple for college projects)
+        # First user is admin 
         if User.query.count() == 0:
             new_user.role = 'admin'
             
