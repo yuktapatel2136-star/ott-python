@@ -51,8 +51,7 @@ def download(movie_id):
         return redirect(url_for('movie.subscription'))
     
     movie = Movie.query.get_or_404(movie_id)
-    # For a real app, you'd serve the file. 
-    # For a demo, we might just redirect to the URL or show a message.
+    
     flash(f'Download started for {movie.title}!', 'success')
     return redirect(url_for('movie.movie_details', movie_id=movie_id))
 

@@ -11,7 +11,6 @@ def home():
     latest = Movie.query.order_by(Movie.date_added.desc()).limit(10).all()
     categories = Category.query.all()
     
-    # Simple search
     search_query = request.args.get('search')
     if search_query:
         latest = Movie.query.filter(Movie.title.contains(search_query)).all()
