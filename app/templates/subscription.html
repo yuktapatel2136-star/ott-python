@@ -1,30 +1,299 @@
 {% extends "base.html" %}
-{% block title %}Subscription{% endblock %}
+{% block title %}Choose Your Plan{% endblock %}
 
 {% block content %}
-<div class="row pt-5 text-center">
-    <div class="col-12">
-        <h1 class="fw-bold mb-4">Choose Your Plan</h1>
-        <p class="text-muted">Unlock unlimited movies and exclusive content.</p>
-    </div>
+<style>
+  .sub-hero {
+    text-align: center;
+    padding: 3rem 0 2rem;
+  }
+  .sub-hero h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #e50914 0%, #ff6b35 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+  }
+  .sub-hero p {
+    font-size: 1.15rem;
+    color: #aaa;
+    margin-top: 0.5rem;
+  }
+
+  /* Plan cards */
+  .plans-row {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 1rem 0 3rem;
+  }
+  .plan-card {
+    background: linear-gradient(145deg, #1c1c1c, #141414);
+    border: 1.5px solid #2e2e2e;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    width: 300px;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .plan-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    border-radius: 20px 20px 0 0;
+  }
+  .plan-card.free::before  { background: #6c757d; }
+  .plan-card.basic::before { background: linear-gradient(90deg, #0d6efd, #6610f2); }
+  .plan-card.premium::before { background: linear-gradient(90deg, #e50914, #ff6b35); }
+
+  .plan-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.6);
+  }
+  .plan-card.free:hover    { border-color: #6c757d; }
+  .plan-card.basic:hover   { border-color: #0d6efd; }
+  .plan-card.premium:hover { border-color: #e50914; }
+
+  .plan-card.active-plan {
+    border-color: #e50914 !important;
+    box-shadow: 0 0 0 3px rgba(229,9,20,0.25);
+  }
+
+  .popular-badge {
+    position: absolute;
+    top: 18px; right: -28px;
+    background: linear-gradient(90deg, #e50914, #ff6b35);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 5px 36px;
+    transform: rotate(45deg);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .plan-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  .plan-card.free    .plan-icon { color: #6c757d; }
+  .plan-card.basic   .plan-icon { color: #0d6efd; }
+  .plan-card.premium .plan-icon { color: #e50914; }
+
+  .plan-name {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+  }
+  .plan-card.free    .plan-name { color: #aaa; }
+  .plan-card.basic   .plan-name { color: #6ea8fe; }
+  .plan-card.premium .plan-name { color: #e50914; }
+
+  .plan-price {
+    font-size: 2.8rem;
+    font-weight: 900;
+    line-height: 1;
+    margin: 1.2rem 0 0.25rem;
+  }
+  .plan-price .currency { font-size: 1.5rem; vertical-align: super; }
+  .plan-price .period   { font-size: 0.9rem; font-weight: 400; color: #888; }
+
+  .plan-divider {
+    border: none;
+    border-top: 1px solid #2e2e2e;
+    margin: 1.5rem 0;
+  }
+  .feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+  }
+  .feature-list li {
+    padding: 0.4rem 0;
+    font-size: 0.93rem;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .feature-list li i.check   { color: #28a745; }
+  .feature-list li i.cross   { color: #555; }
+
+  .btn-plan {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .btn-plan-free    { background: #2e2e2e; color: #888; cursor: default; }
+  .btn-plan-basic   { background: linear-gradient(135deg, #0d6efd, #6610f2); color: white; }
+  .btn-plan-basic:hover  { opacity: 0.9; transform: scale(1.02); }
+  .btn-plan-premium { background: linear-gradient(135deg, #e50914, #ff6b35); color: white; }
+  .btn-plan-premium:hover { opacity: 0.9; transform: scale(1.02); }
+  .btn-plan-current { background: #1f3b1f; color: #4caf50; border: 1.5px solid #4caf50; cursor: default; }
+
+  /* Active subscription info box */
+  .sub-info-box {
+    background: linear-gradient(135deg, #1a1f1a, #0f1a0f);
+    border: 1.5px solid #2a5c2a;
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .sub-info-box .info-icon {
+    font-size: 2.5rem;
+    color: #4caf50;
+  }
+  .sub-info-box h5 { color: #4caf50; margin: 0; font-weight: 700; }
+  .sub-info-box p  { color: #aaa; margin: 0.2rem 0 0; font-size: 0.9rem; }
+  .cancel-btn {
+    margin-left: auto;
+    background: transparent;
+    border: 1.5px solid #e50914;
+    color: #e50914;
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cancel-btn:hover { background: #e50914; color: white; }
+</style>
+
+<div class="sub-hero">
+  <div class="mb-3">
+    <span class="badge rounded-pill px-4 py-2 fw-semibold"
+          style="background: rgba(229,9,20,0.15); color: #e50914; border: 1px solid rgba(229,9,20,0.3); font-size: 0.8rem; letter-spacing: 1px;">
+      SUBSCRIPTION PLANS
+    </span>
+  </div>
+  <h1>Choose Your Plan</h1>
+  <p>Unlock unlimited entertainment with our premium features.</p>
 </div>
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5">
-        <div class="card h-100 p-5 shadow border-danger text-center bg-dark">
-            <h2 class="fw-bold text-danger">Premium Plan</h2>
-            <div class="display-4 my-4 fw-bold">₹499<span class="fs-5 text-muted">/month</span></div>
-            <ul class="list-unstyled text-start my-4">
-                <li class="mb-2"> Watch everything on StreamHub</li>
-                <li class="mb-2"> 4K UHD Streaming</li>
-                <li class="mb-2"> Ads-free Experience</li>
-                <li class="mb-2"> 4 Devices at once</li>
-            </ul>
-            <form action="{{ url_for('movie.subscribe') }}" method="POST">
-                <button type="submit" class="btn btn-danger btn-lg w-100 py-3 fw-bold">ACTIVATE PLAN</button>
-            </form>
-            <p class="mt-3 small text-muted">Direct activation for demo purposes.</p>
-        </div>
-    </div>
+<!-- Active subscription banner -->
+{% if current_user.plan_is_active %}
+<div class="sub-info-box">
+  <div class="info-icon">
+    {% if current_user.subscription_plan == 'premium' %}
+      <i class="fas fa-crown" style="color:#e50914;"></i>
+    {% else %}
+      <i class="fas fa-star" style="color:#6ea8fe;"></i>
+    {% endif %}
+  </div>
+  <div>
+    {% if current_user.subscription_plan == 'premium' %}
+      <h5 style="color:#e50914;"><i class="fas fa-crown me-2"></i>You are on the Premium Plan</h5>
+    {% else %}
+      <h5 style="color:#6ea8fe;"><i class="fas fa-star me-2"></i>You are on the Basic Plan</h5>
+    {% endif %}
+    <p>Active until &nbsp;<strong style="color:#fff;">{{ current_user.subscription_end.strftime('%d %b %Y') }}</strong>
+      &nbsp;·&nbsp;
+      {% set days_left = (current_user.subscription_end - today).days %}
+      <span style="color:#4caf50; font-size:0.85rem;">{{ days_left }} days remaining</span>
+    </p>
+  </div>
+
 </div>
+{% endif %}
+
+<div class="plans-row">
+
+  <!-- FREE -->
+  <div class="plan-card free {% if current_plan == 'free' or not current_user.plan_is_active %}active-plan{% endif %}">
+    <div class="plan-icon"><i class="fas fa-tv"></i></div>
+    <div class="plan-name">Free</div>
+    <div class="text-muted" style="font-size:0.85rem;">Always free, forever</div>
+    <div class="plan-price" style="color:#888;">₹<span class="currency" style="font-size:1rem;"></span>0<span class="period">/month</span></div>
+    <hr class="plan-divider">
+    <ul class="feature-list">
+      <li><i class="fas fa-check check"></i> Limited movies &amp; shows</li>
+      <li><i class="fas fa-check check"></i> SD quality (480p)</li>
+      <li><i class="fas fa-times cross"></i> Ads supported</li>
+      <li><i class="fas fa-times cross"></i> 1 device at a time</li>
+      <li><i class="fas fa-times cross"></i> No HD / 4K content</li>
+    </ul>
+    <button class="btn-plan btn-plan-free" disabled>
+      {% if not current_user.plan_is_active %}
+        <i class="fas fa-check me-2"></i>Current Plan
+      {% else %}
+        Free Plan
+      {% endif %}
+    </button>
+  </div>
+
+  <!-- BASIC -->
+  <div class="plan-card basic {% if current_plan == 'basic' and current_user.plan_is_active %}active-plan{% endif %}">
+    <div class="plan-icon"><i class="fas fa-star"></i></div>
+    <div class="plan-name">Basic</div>
+    <div class="text-muted" style="font-size:0.85rem;">Perfect for individuals</div>
+    <div class="plan-price" style="color:#6ea8fe;">₹199<span class="period">/month</span></div>
+    <hr class="plan-divider">
+    <ul class="feature-list">
+      <li><i class="fas fa-check check"></i> All movies &amp; shows</li>
+      <li><i class="fas fa-check check"></i> HD quality (1080p)</li>
+      <li><i class="fas fa-check check"></i> Ad-free experience</li>
+      <li><i class="fas fa-check check"></i> Offline Downloads</li>
+      <li><i class="fas fa-check check"></i> 2 devices at a time</li>
+      <li><i class="fas fa-times cross"></i> No 4K UHD</li>
+    </ul>
+    {% if current_plan == 'basic' and current_user.plan_is_active %}
+      <button class="btn-plan btn-plan-current" disabled>
+        <i class="fas fa-check me-2"></i>Current Plan
+      </button>
+    {% else %}
+      <a href="{{ url_for('movie.checkout', plan_key='basic') }}" class="btn-plan btn-plan-basic text-decoration-none text-center d-block">
+        Get Basic &nbsp;<i class="fas fa-arrow-right"></i>
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- PREMIUM -->
+  <div class="plan-card premium {% if current_plan == 'premium' and current_user.plan_is_active %}active-plan{% endif %}">
+    <div class="popular-badge">Popular</div>
+    <div class="plan-icon"><i class="fas fa-crown"></i></div>
+    <div class="plan-name">Premium</div>
+    <div class="text-muted" style="font-size:0.85rem;">Best for families &amp; cinephiles</div>
+    <div class="plan-price" style="color:#e50914;">₹499<span class="period">/month</span></div>
+    <hr class="plan-divider">
+    <ul class="feature-list">
+      <li><i class="fas fa-check check"></i> Everything in Basic</li>
+      <li><i class="fas fa-check check"></i> 4K UHD Streaming</li>
+      <li><i class="fas fa-check check"></i> Dolby Atmos Audio</li>
+      <li><i class="fas fa-check check"></i> 4 devices at a time</li>
+      <li><i class="fas fa-check check"></i> Offline Downloads</li>
+      <li><i class="fas fa-check check"></i> Early access — new releases</li>
+    </ul>
+    {% if current_plan == 'premium' and current_user.plan_is_active %}
+      <button class="btn-plan btn-plan-current" disabled>
+        <i class="fas fa-check me-2"></i>Current Plan
+      </button>
+    {% else %}
+      <a href="{{ url_for('movie.checkout', plan_key='premium') }}" class="btn-plan btn-plan-premium text-decoration-none text-center d-block">
+        Get Premium &nbsp;<i class="fas fa-crown"></i>
+      </a>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Comparison note -->
+<p class="text-center text-muted small pb-4">
+  <i class="fas fa-shield-alt me-1 text-success"></i>
+  Secure simulated payment — No real charges. Enjoy your content!
+</p>
 {% endblock %}

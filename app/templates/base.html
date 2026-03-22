@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,14 +15,17 @@
             color: #efefef;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
+
         .navbar {
-            background-color: rgba(0,0,0,0.95) !important;
+            background-color: rgba(0, 0, 0, 0.95) !important;
             padding: 1rem 0;
         }
+
         .navbar-brand {
             font-size: 1.5rem;
             letter-spacing: 1px;
         }
+
         .card {
             background-color: #1a1a1a;
             color: white;
@@ -31,25 +35,30 @@
             overflow: hidden;
             cursor: pointer;
         }
+
         .card:hover {
             transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
             z-index: 10;
         }
+
         .btn-danger {
             background-color: #e50914;
             border: none;
             font-weight: 600;
         }
+
         .btn-danger:hover {
             background-color: #f6121d;
         }
+
         .section-title {
             margin-bottom: 1.5rem;
             font-weight: 700;
             border-left: 4px solid #e50914;
             padding-left: 15px;
         }
+
         .badge-ott {
             position: absolute;
             top: 10px;
@@ -60,11 +69,13 @@
             font-size: 0.75rem;
             font-weight: bold;
         }
+
         .search-row {
             max-width: 400px;
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-lg">
         <div class="container">
@@ -78,41 +89,66 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.home') }}">Home</a></li>
                     {% if current_user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('movie.history') }}">Watch History</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('movie.history') }}">Watch History</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('movie.watchlist') }}">Watch List</a></li>
                     {% endif %}
                 </ul>
-                
+
                 <form class="d-flex me-3 search-row" action="{{ url_for('main.home') }}" method="GET">
-                    <input class="form-control form-control-sm bg-dark text-white border-secondary me-2" type="search" name="search" placeholder="Search movies..." aria-label="Search">
+                    <input class="form-control form-control-sm bg-dark text-white border-secondary me-2" type="search"
+                        name="search" placeholder="Search movies..." aria-label="Search">
                     <button class="btn btn-outline-danger btn-sm" type="submit"><i class="fas fa-search"></i></button>
                 </form>
 
                 <ul class="navbar-nav align-items-center">
                     {% if current_user.is_authenticated %}
-                        {% if current_user.role == 'admin' %}
-                        <li class="nav-item">
-                            <a class="nav-link text-warning fw-bold" href="{{ url_for('admin.dashboard') }}">
-                                <i class="fas fa-user-shield me-1"></i>Admin
-                            </a>
-                        </li>
-                        {% endif %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-light" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                {{ current_user.username }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
-                                <li><a class="dropdown-item" href="{{ url_for('movie.subscription') }}">Subscription</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Logout</a></li>
-                            </ul>
-                        </li>
+                    {% if current_user.role == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link text-warning fw-bold" href="{{ url_for('admin.dashboard') }}">
+                            <i class="fas fa-user-shield me-1"></i>Admin
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-light d-flex align-items-center gap-2" href="#"
+                            id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            {{ current_user.username }}
+                            {% if current_user.plan_is_active %}
+                            {% if current_user.subscription_plan == 'premium' %}
+                            <span class="badge rounded-pill"
+                                style="background:linear-gradient(135deg,#e50914,#ff6b35);font-size:0.65rem;padding:3px 8px;"><i
+                                    class="fas fa-crown me-1"></i>PREMIUM</span>
+                            {% else %}
+                            <span class="badge rounded-pill"
+                                style="background:linear-gradient(135deg,#0d6efd,#6610f2);font-size:0.65rem;padding:3px 8px;"><i
+                                    class="fas fa-star me-1"></i>BASIC</span>
+                            {% endif %}
+                            {% else %}
+                            <span class="badge rounded-pill"
+                                style="background:#2e2e2e;color:#888;font-size:0.65rem;padding:3px 8px;">FREE</span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('movie.subscription') }}">
+                                    <i class="fas fa-layer-group me-2 text-danger"></i>Subscription
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i
+                                        class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="btn btn-sm btn-outline-light me-2 px-3" href="{{ url_for('auth.login') }}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-sm btn-danger px-3 shadow" href="{{ url_for('auth.register') }}">Join Now</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-outline-light me-2 px-3" href="{{ url_for('auth.login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-danger px-3 shadow" href="{{ url_for('auth.register') }}">Join Now</a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>
@@ -121,14 +157,14 @@
 
     <div class="container mt-4 mb-5">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible shadow-sm fade show mb-4 rounded-3 border-0">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible shadow-sm fade show mb-4 rounded-3 border-0">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
 
         {% block content %}{% endblock %}
@@ -148,6 +184,51 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleWatchlistGlobal(movieId, btnElement) {
+            if (!btnElement) return;
+
+            const icon = btnElement.querySelector('i');
+            const loginUrl = document.body.getAttribute('data-login-url') || "{{ url_for('auth.login') }}";
+
+            fetch(`/toggle_watchlist/${movieId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (response.status === 401) {
+                        window.location.href = "{{ url_for('auth.login', next=request.path) }}";
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data) return;
+                    if (data.status === 'added') {
+                        if (icon) {
+                            icon.classList.remove('fa-plus');
+                            icon.classList.add('fa-check', 'text-success');
+                        }
+                        btnElement.title = "Remove from Watch List";
+                    } else if (data.status === 'removed') {
+                        if (icon) {
+                            icon.classList.remove('fa-check', 'text-success');
+                            icon.classList.add('fa-plus');
+                        }
+                        btnElement.title = "Add to Watch List";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (error.message && error.message.includes('Unexpected token')) {
+                        window.location.href = "{{ url_for('auth.login', next=request.path) }}";
+                    }
+                });
+        }
+    </script>
     {% block scripts %}{% endblock %}
 </body>
+
 </html>

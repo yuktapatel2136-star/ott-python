@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+{% block title %}Checkout — {{ plan.name }} Plan{% endblock %}
+
+{% block content %}
+<style>
+  .checkout-wrap {
+    max-width: 520px;
+    margin: 2.5rem auto 4rem;
+  }
+
+  /* Back breadcrumb */
+  .back-link {
+    color: #888;
+    font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* Order summary card */
+  .order-summary {
+    border-radius: 16px;
+    padding: 1.5rem 1.8rem;
+    margin-bottom: 1.8rem;
+    background: linear-gradient(135deg, #1c1c1c, #121212);
+    border: 1.5px solid #2e2e2e;
+  }
+  .order-summary .plan-icon-lg {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .plan-badge {
+    display: inline-block;
+    padding: 0.3rem 0.9rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .badge-basic   { background: rgba(13,110,253,0.2); color: #6ea8fe; border: 1px solid rgba(13,110,253,0.4); }
+  .badge-premium { background: rgba(229,9,20,0.15);  color: #e50914; border: 1px solid rgba(229,9,20,0.3); }
+
+  .price-big {
+    font-size: 3.2rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .price-big.basic   { color: #6ea8fe; }
+  .price-big.premium { color: #e50914; }
+
+  /* Total row color by plan */
+  .total-basic   { color: #6ea8fe; }
+  .total-premium { color: #e50914; }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.45rem 0;
+    font-size: 0.9rem;
+    color: #bbb;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row .val { color: #fff; font-weight: 600; }
+  .summary-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  /* Payment form */
+  .payment-card {
+    background: #161616;
+    border: 1.5px solid #252525;
+    border-radius: 20px;
+    padding: 2rem 2rem;
+  }
+  .payment-card h5 {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .payment-card h5 i { color: #e50914; }
+
+  .form-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #aaa;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .form-control {
+    background: #0f0f0f;
+    border: 1.5px solid #2e2e2e;
+    color: #fff;
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+  }
+  .form-control:focus {
+    background: #111;
+    border-color: #e50914;
+    box-shadow: 0 0 0 3px rgba(229,9,20,0.15);
+    color: #fff;
+  }
+  .form-control::placeholder { color: #555; }
+
+  /* Card number with icon */
+  .card-number-wrap {
+    position: relative;
+  }
+  .card-number-wrap .card-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    color: #555;
+    pointer-events: none;
+  }
+
+  /* Simulated test cards */
+  .test-cards {
+    background: rgba(229,9,20,0.06);
+    border: 1px solid rgba(229,9,20,0.2);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.82rem;
+    color: #ccc;
+  }
+  .test-cards strong { color: #e50914; }
+  .test-cards code {
+    background: #1a1a1a;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #fff;
+    font-family: monospace;
+  }
+
+  /* Pay button */
+  .btn-pay {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+  }
+  .btn-pay.basic   { background: linear-gradient(135deg, #0d6efd, #6610f2); color: white; }
+  .btn-pay.premium { background: linear-gradient(135deg, #e50914, #ff6b35); color: white; }
+  .btn-pay:hover   { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(229,9,20,0.35); opacity: 0.95; }
+
+  .secure-note {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: #555;
+  }
+  .secure-note i { color: #28a745; margin-right: 4px; }
+
+  /* Input masking animation */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .payment-card { animation: fadeUp 0.4s ease; }
+</style>
+
+<div class="checkout-wrap">
+  <a href="{{ url_for('movie.subscription') }}" class="back-link">
+    <i class="fas fa-chevron-left"></i> Back to Plans
+  </a>
+
+  <!-- Order Summary -->
+  <div class="order-summary text-center">
+    {% if plan_key == 'premium' %}
+      <div class="plan-icon-lg"><i class="fas fa-crown" style="color:#e50914;"></i></div>
+      <div class="plan-badge badge-premium">Popular Choice</div>
+    {% else %}
+      <div class="plan-icon-lg"><i class="fas fa-star" style="color:#6ea8fe;"></i></div>
+      <div class="plan-badge badge-basic">Great Value</div>
+    {% endif %}
+    <div class="price-big {{ plan_key }}">₹{{ plan.price }}</div>
+    <p class="text-muted mb-0" style="font-size:0.85rem;">per month</p>
+  </div>
+
+  <!-- Breakdown -->
+  <div style="background:#141414; border:1.5px solid #252525; border-radius:12px; padding:1rem 1.5rem; margin-bottom:1.5rem;">
+    <div class="summary-row"><span>Plan</span><span class="val">{{ plan.name }}</span></div>
+    <div class="summary-row"><span>Duration</span><span class="val">30 Days</span></div>
+    <div class="summary-row"><span>Tax (GST 18%)</span><span class="val">₹{{ (plan.price * 0.18) | round(0) | int }}</span></div>
+    <div class="summary-total">
+      <span>Total</span>
+      <span class="total-{{ plan_key }}">
+        ₹{{ (plan.price * 1.18) | round(0) | int }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Demo hint -->
+  <div class="test-cards">
+    <strong>🧪 Demo Mode</strong> — Use any test values below:<br>
+    Card: <code>4111 1111 1111 1111</code> &nbsp;|&nbsp;
+    Expiry: <code>12/26</code> &nbsp;|&nbsp;
+    CVV: <code>123</code>
+  </div>
+
+  <!-- Payment Form -->
+  <div class="payment-card">
+    <h5><i class="fas fa-lock"></i> Secure Payment</h5>
+
+    <form action="{{ url_for('movie.process_payment', plan_key=plan_key) }}" method="POST" id="paymentForm">
+
+      <div class="mb-3">
+        <label class="form-label">Cardholder Name</label>
+        <input type="text" name="name" class="form-control" id="cardName"
+               placeholder="John Doe" autocomplete="name" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Card Number</label>
+        <div class="card-number-wrap">
+          <input type="text" name="card_number" class="form-control" id="cardNumber"
+                 placeholder="0000 0000 0000 0000" maxlength="19"
+                 inputmode="numeric" autocomplete="cc-number" required>
+          <span class="card-icon"><i class="fas fa-credit-card"></i></span>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <label class="form-label">Expiry Date</label>
+          <input type="text" name="expiry" class="form-control" id="expiry"
+                 placeholder="MM/YY" maxlength="5"
+                 inputmode="numeric" autocomplete="cc-exp" required>
+        </div>
+        <div class="col-6">
+          <label class="form-label">CVV</label>
+          <input type="password" name="cvv" class="form-control" id="cvv"
+                 placeholder="•••" maxlength="4"
+                 inputmode="numeric" autocomplete="cc-csc" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-pay {{ plan_key }}" id="payBtn">
+        <i class="fas fa-lock me-2"></i>Pay ₹{{ (plan.price * 1.18) | round(0) | int }} &amp; Activate
+      </button>
+    </form>
+
+    <div class="secure-note">
+      <i class="fas fa-shield-alt"></i>
+      This is a simulated payment — no real charges are made.
+    </div>
+  </div>
+
+  <!-- Card brand icons -->
+  <div class="text-center mt-3" style="opacity:0.35; font-size:1.6rem; letter-spacing:0.5rem;">
+    <i class="fab fa-cc-visa"></i>
+    <i class="fab fa-cc-mastercard"></i>
+    <i class="fab fa-cc-amex"></i>
+    <i class="fab fa-cc-paypal"></i>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  /* Card number formatting: insert spaces every 4 digits */
+  document.getElementById('cardNumber').addEventListener('input', function(e) {
+    let val = e.target.value.replace(/\D/g, '').slice(0, 16);
+    e.target.value = val.replace(/(.{4})/g, '$1 ').trim();
+
+    /* Detect card brand */
+    const icon = document.querySelector('.card-icon i');
+    if (val.startsWith('4'))       { icon.className = 'fab fa-cc-visa'; icon.style.color = '#1a1f71'; }
+    else if (/^5[1-5]/.test(val)) { icon.className = 'fab fa-cc-mastercard'; icon.style.color = '#eb001b'; }
+    else if (/^3[47]/.test(val))  { icon.className = 'fab fa-cc-amex'; icon.style.color = '#2e77bc'; }
+    else                           { icon.className = 'fas fa-credit-card'; icon.style.color = '#555'; }
+  });
+
+  /* Expiry auto-slash */
+  document.getElementById('expiry').addEventListener('input', function(e) {
+    let val = e.target.value.replace(/\D/g, '').slice(0, 4);
+    if (val.length >= 3) val = val.slice(0,2) + '/' + val.slice(2);
+    e.target.value = val;
+  });
+
+  /* Pay button loader */
+  document.getElementById('paymentForm').addEventListener('submit', function() {
+    const btn = document.getElementById('payBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing…';
+  });
+</script>
+{% endblock %}

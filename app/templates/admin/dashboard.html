@@ -116,7 +116,7 @@
         </div>
     </div>
 
-    <!--  Most Watched -->
+    <!-- Analytics / Most Watched -->
     <div class="col-lg-4">
         <div class="card bg-dark shadow mb-4">
             <div class="card-header bg-black py-3">
@@ -168,9 +168,9 @@
                     <tbody>
                         {% for u in users %}
                         <tr>
-                            <td class="text-bold">{{ u.id }}</td>
+                            <td class="text-bold small">{{ u.id }}</td>
                             <td class="fw-bold">{{ u.username }}</td>
-                            <td class="text-bold">{{ u.email }}</td>
+                            <td class="text-bold small">{{ u.email }}</td>
                             <td>
                                 {% if u.role == 'admin' %}
                                 <span class="badge bg-danger">Admin</span>
@@ -179,10 +179,24 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if u.is_subscribed %}
-                                <span class="badge bg-success"><i class="fas fa-crown me-1"></i>Premium</span>
+                                {% if u.plan_is_active %}
+                                    {% if u.subscription_plan == 'premium' %}
+                                    <span class="badge fw-semibold"
+                                          style="background:linear-gradient(135deg,#e50914,#ff6b35);"
+                                          title="Active until {{ u.subscription_end }}">
+                                        <i class="fas fa-crown me-1"></i>Premium
+                                    </span>
+                                    {% elif u.subscription_plan == 'basic' %}
+                                    <span class="badge fw-semibold"
+                                          style="background:linear-gradient(135deg,#0d6efd,#6610f2);"
+                                          title="Active until {{ u.subscription_end }}">
+                                        <i class="fas fa-star me-1"></i>Basic
+                                    </span>
+                                    {% endif %}
                                 {% else %}
-                                <span class="badge bg-outline-secondary border text-secondary"></span>
+                                <span class="badge bg-secondary border text-light">
+                                    <i class="fas fa-tv me-1"></i>Free
+                                </span>
                                 {% endif %}
                             </td>
                             <td>

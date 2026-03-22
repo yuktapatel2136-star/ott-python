@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Watch List{% endblock %}
+
+{% block content %}
+<div class="row pt-4 mb-4">
+    <div class="col">
+        <h1 class="fw-bold"><i class="fas fa-plus-circle text-danger me-2"></i>My Watch List</h1>
+        <p class="text-muted">Movies and shows you've saved to watch later.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for item in watchlist %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card bg-dark border-0 shadow-sm h-100 overflow-hidden">
+            <div class="row g-0">
+                <div class="col-4">
+                    <a href="{{ url_for('movie.movie_details', movie_id=item.movie.id) }}">
+                        <img src="{{ item.movie.thumbnail }}" class="img-fluid h-100" style="object-fit: cover; min-height: 120px;">
+                    </a>
+                </div>
+                <div class="col-8">
+                    <div class="card-body p-3 d-flex flex-column justify-content-between h-100">
+                        <div>
+                            <a href="{{ url_for('movie.movie_details', movie_id=item.movie.id) }}" class="text-decoration-none">
+                                <h6 class="card-title fw-bold text-truncate mb-1 text-white">{{ item.movie.title }}</h6>
+                            </a>
+                            <p class="text-muted small mb-0">Added: {{ item.date_added.strftime('%d %b %Y') if item.date_added else 'Recently' }}</p>
+                            <p class="text-muted small mb-2"><i class="fas fa-eye me-1"></i>{{ item.movie.views }} Views</p>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('movie.watch', movie_id=item.movie.id) }}" class="btn btn-danger btn-sm flex-grow-1">
+                                <i class="fas fa-play me-2"></i>Watch Movie
+                            </a>
+                            <button class="btn btn-outline-secondary btn-sm px-3 remove-from-watchlist" 
+                                    data-movie-id="{{ item.movie.id }}" 
+                                    title="Remove from Watchlist">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="p-5 border border-secondary border-dashed rounded bg-dark bg-opacity-25 shadow-sm">
+            <i class="fas fa-folder-open fa-3x text-muted mb-3 opacity-50"></i>
+            <h4 class="fw-bold">Your watch list is empty.</h4>
+            <p class="text-muted">Explore our collection and add your favorite movies to watch them later!</p>
+            <a href="{{ url_for('main.home') }}" class="btn btn-danger btn-lg mt-3 px-5 py-2 shadow">
+                <i class="fas fa-search me-2"></i>Browse Movies
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function removeFromWatchlist(movieId, btn) {
+    if (!confirm('Are you sure you want to remove this from your watch list?')) return;
+    
+    // Smooth transition
+    const cardCol = btn.closest('.col-md-6');
+    cardCol.style.opacity = '0.5';
+    cardCol.style.pointerEvents = 'none';
+
+    fetch(`/toggle_watchlist/${movieId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.status === 401) {
+            location.reload(); // User probably logged out
+            return;
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.status === 'removed') {
+            cardCol.classList.add('animate__animated', 'animate__fadeOut');
+            setTimeout(() => {
+                cardCol.remove();
+                
+                // If it was the last item, show empty state
+                const remaining = document.querySelectorAll('.card-body').length;
+                if (remaining === 0) {
+                    location.reload();
+                }
+            }, 300);
+        } else {
+            cardCol.style.opacity = '1';
+            cardCol.style.pointerEvents = 'auto';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        cardCol.style.opacity = '1';
+        cardCol.style.pointerEvents = 'auto';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.remove-from-watchlist').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const movieId = this.getAttribute('data-movie-id');
+            removeFromWatchlist(movieId, this);
+        });
+    });
+});
+</script>
+{% endblock %}

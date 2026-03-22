@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from functools import wraps
 import os
 from werkzeug.utils import secure_filename
+from datetime import date, timedelta
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -43,11 +44,12 @@ def dashboard():
     movies = Movie.query.all()
     users = User.query.all()
     
+    # Simple metrics
     most_watched = Movie.query.order_by(Movie.views.desc()).limit(5).all()
     subscribed_users = User.query.filter_by(is_subscribed=True).count()
     simulated_revenue = subscribed_users * 499 
     
-    # Calculate percentage
+    # Calculate percentage safely
     sub_percent = round((subscribed_users / total_users * 100), 1) if total_users > 0 else 0
     
     return render_template('admin/dashboard.html', 
@@ -61,7 +63,6 @@ def dashboard():
                          movies=movies, 
                          users=users)
 
-##### Add Movie
 @admin_bp.route('/admin/add_movie', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -75,6 +76,7 @@ def add_movie():
         year = request.form.get('year')
         is_featured = 'is_featured' in request.form
         is_trending = 'is_trending' in request.form
+        is_premium  = 'is_premium'  in request.form
         
         # Handle image upload
         thumbnail = ''
@@ -114,7 +116,8 @@ def add_movie():
             language=language,
             release_year=year,
             is_featured=is_featured,
-            is_trending=is_trending
+            is_trending=is_trending,
+            is_premium=is_premium
         )
         db.session.add(new_movie)
         db.session.commit()
@@ -123,7 +126,6 @@ def add_movie():
         
     return render_template('admin/add_movie.html', categories=categories)
 
-### Edit Movie
 @admin_bp.route('/admin/edit_movie/<int:movie_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -138,8 +140,9 @@ def edit_movie(movie_id):
         movie.release_year = request.form.get('year')
         movie.is_featured = 'is_featured' in request.form
         movie.is_trending = 'is_trending' in request.form
+        movie.is_premium  = 'is_premium'  in request.form
         
-        # Handle new image upload
+        # Handle new image upload (optional - keep existing if none uploaded)
         image_file = request.files.get('image_file')
         if image_file and image_file.filename != '':
             if allowed_image(image_file.filename):
@@ -149,7 +152,7 @@ def edit_movie(movie_id):
                 flash('Invalid image format!', 'danger')
                 return render_template('admin/edit_movie.html', movie=movie, categories=categories)
 
-        # Handle new video upload
+        # Handle new video upload (optional - keep existing if none uploaded)
         video_file = request.files.get('video_file')
         if video_file and video_file.filename != '':
             if allowed_video(video_file.filename):
@@ -168,7 +171,6 @@ def edit_movie(movie_id):
         
     return render_template('admin/edit_movie.html', movie=movie, categories=categories)
 
-### Delete Movie
 @admin_bp.route('/admin/delete_movie/<int:movie_id>')
 @login_required
 @admin_required
@@ -186,7 +188,6 @@ def delete_movie(movie_id):
     flash(f'"{title}" deleted successfully!', 'info')
     return redirect(url_for('admin.dashboard'))
 
-### Add Categories
 @admin_bp.route('/admin/categories', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -203,7 +204,6 @@ def manage_categories():
     categories = Category.query.all()
     return render_template('admin/categories.html', categories=categories)
 
-### Delete Categories
 @admin_bp.route('/admin/delete_category/<int:cat_id>')
 @login_required
 @admin_required
@@ -214,17 +214,19 @@ def delete_category(cat_id):
     flash('Category deleted!', 'info')
     return redirect(url_for('admin.manage_categories'))
 
-### User Management
+# ── User Management ──────────────────────────────────────────────────────────
+
 @admin_bp.route('/admin/edit_user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def edit_user(user_id):
     user = User.query.get_or_404(user_id)
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        email    = request.form.get('email', '').strip()
-        role     = request.form.get('role', 'user')
-        is_subscribed = 'is_subscribed' in request.form
+        username          = request.form.get('username', '').strip()
+        email             = request.form.get('email', '').strip()
+        role              = request.form.get('role', 'user')
+        subscription_plan = request.form.get('subscription_plan', 'free')
+        is_subscribed     = subscription_plan in ('basic', 'premium')
 
         # Check uniqueness (exclude current user)
         existing_username = User.query.filter(User.username == username, User.id != user_id).first()
@@ -237,10 +239,19 @@ def edit_user(user_id):
             flash('Email already in use by another user.', 'danger')
             return render_template('admin/edit_user.html', user=user)
 
-        user.username     = username
-        user.email        = email
-        user.role         = role
-        user.is_subscribed = is_subscribed
+        user.username          = username
+        user.email             = email
+        user.role              = role
+        user.subscription_plan = subscription_plan
+        user.is_subscribed     = is_subscribed
+
+        if subscription_plan in ('basic', 'premium'):
+            today = date.today()
+            user.subscription_start = today
+            user.subscription_end   = today + timedelta(days=30)
+        else:
+            user.subscription_start = None
+            user.subscription_end   = None
 
         # Optional password reset
         new_password = request.form.get('new_password', '').strip()

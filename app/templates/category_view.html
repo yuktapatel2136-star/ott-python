@@ -9,23 +9,68 @@
     </div>
 </div>
 
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
     {% for movie in movies %}
     <div class="col">
-        <div class="card h-100 shadow">
-            <img src="{{ movie.thumbnail }}" class="card-img-top" alt="{{ movie.title }}" style="height: 200px; object-fit: cover;">
+        <div class="card h-100 shadow border-0">
+            <div class="position-relative">
+                <img src="{{ movie.thumbnail }}" class="card-img-top" alt="{{ movie.title }}"
+                    style="height: 240px; object-fit: cover;">
+                {% if movie.is_premium %}
+                <span class="badge position-absolute fw-bold"
+                    style="top:10px;right:10px;z-index:5;background:linear-gradient(135deg,#e50914,#ff6b35);padding:4px 8px;border-radius:4px;font-size:0.7rem;">
+                    <i class="fas fa-crown me-1"></i>PREMIUM
+                </span>
+                {% endif %}
+            </div>
             <div class="card-body">
-                <h5 class="card-title text-truncate">{{ movie.title }}</h5>
-                <p class="text-muted small">{{ movie.release_year }} | {{ movie.language }}</p>
-                <a href="{{ url_for('movie.movie_details', movie_id=movie.id) }}" class="btn btn-outline-danger btn-sm w-100">View Details</a>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h5 class="card-title text-truncate mb-0" style="max-width: 140px;">{{ movie.title }}</h5>
+                    {% if movie.language %}
+                    <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ movie.language }}</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <p class="small mb-0 text-bold">{{ category.name }} | {{ movie.release_year }}</p>
+                    <a href="{{ url_for('movie.watch', movie_id=movie.id) }}" class="btn btn-danger py-0 px-2 shadow-sm"
+                        style="font-size: 0.7rem; border-radius: 4px; font-weight: 600;">Watch Now</a>
+                </div>
+                <hr class="border-secondary my-2">
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('movie.movie_details', movie_id=movie.id) }}"
+                        class="btn btn-outline-danger btn-sm flex-grow-1">View Details</a>
+                    <button class="btn btn-outline-secondary btn-sm watchlist-toggle-btn" 
+                            data-movie-id="{{ movie.id }}" 
+                            title="Add to Watch List">
+                        <i class="fas {% if movie.id in watchlist_ids %}fa-check text-success{% else %}fa-plus{% endif %}"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
     {% else %}
     <div class="col-12 text-center py-5">
-        <h4>No movies in this category yet.</h4>
-        <a href="{{ url_for('main.home') }}" class="btn btn-outline-light mt-3">Browse Other Content</a>
+        <div class="p-5 border border-secondary border-dashed rounded bg-dark bg-opacity-25">
+            <i class="fas fa-film fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No movies in this category yet.</h4>
+            <a href="{{ url_for('main.home') }}" class="btn btn-outline-light mt-2">Clear Search</a>
+        </div>
     </div>
     {% endfor %}
 </div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.watchlist-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const movieId = this.getAttribute('data-movie-id');
+                toggleWatchlistGlobal(movieId, this);
+            });
+        });
+    });
+</script>
+{% endblock %}
 {% endblock %}

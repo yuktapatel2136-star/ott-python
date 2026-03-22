@@ -2,14 +2,22 @@
 {% block title %}{{ movie.title }}{% endblock %}
 
 {% block content %}
-<div class="row pt-4 g-lg-5">
+<div class="row pt-4 g-lg-5" data-login-url="{{ url_for('auth.login', next=request.path) }}">
     <!-- Movie Poster -->
     <div class="col-md-4 mb-4 mb-md-0">
         <div class="position-relative shadow-lg rounded-4 overflow-hidden">
-            <img src="{{ movie.thumbnail }}" class="img-fluid w-100" alt="{{ movie.title }}" style="min-height: 450px; object-fit: cover;">
+            <img src="{{ movie.thumbnail }}" class="img-fluid w-100" alt="{{ movie.title }}"
+                style="min-height: 450px; object-fit: cover;">
             <div class="position-absolute top-0 start-0 m-3">
                 <span class="badge bg-danger px-3 py-2 shadow">{{ movie.category_name }}</span>
             </div>
+            {% if movie.is_premium %}
+            <div class="position-absolute top-0 end-0 m-3">
+                <span class="badge px-3 py-2 shadow" style="background:linear-gradient(135deg,#e50914,#ff6b35);">
+                    <i class="fas fa-crown me-1"></i>PREMIUM
+                </span>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -17,10 +25,12 @@
     <div class="col-md-8">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h1 class="display-4 fw-bold mb-0">{{ movie.title }}</h1>
-            
+            <div class="text-warning h4 mb-0">
+                <i class="fas fa-star me-1"></i>4.5 <small class="text-muted fs-6">(Avg)</small>
+            </div>
         </div>
-        
-        <div class="d-flex gap-3 text-muted mb-4 align-items-center">
+
+        <div class="d-flex gap-3 text-bold mb-4 align-items-center">
             <span><i class="far fa-calendar-alt me-1"></i>{{ movie.release_year }}</span>
             <span>|</span>
             <span><i class="fas fa-globe me-1"></i>{{ movie.language }}</span>
@@ -33,14 +43,38 @@
         </p>
 
         <div class="d-flex flex-wrap gap-3 mb-5">
-            <a href="{{ url_for('movie.watch', movie_id=movie.id) }}" class="btn btn-danger btn-lg px-5 py-3 shadow">
-                <i class="fas fa-play me-2"></i>WATCH NOW
-            </a>
-            <a href="{{ url_for('movie.download', movie_id=movie.id) }}" class="btn btn-outline-light btn-lg px-4 py-3">
-                <i class="fas fa-download me-2"></i>DOWNLOAD
-            </a>
-            <button class="btn btn-dark btn-lg px-4 py-3 border border-secondary shadow-sm">
-                <i class="fas fa-plus"></i>
+            {% if current_user.is_authenticated %}
+                {% if movie.is_premium and not current_user.plan_is_active %}
+                    <!-- Locked: movie is premium and user has no active subscription -->
+                    <a href="{{ url_for('movie.subscription') }}" class="btn btn-lg px-5 py-3 shadow fw-bold"
+                        style="background:linear-gradient(135deg,#e50914,#ff6b35);color:white;">
+                        <i class="fas fa-lock me-2"></i>Subscribe to Watch
+                    </a>
+                    <span class="btn btn-dark btn-lg px-4 py-3 border border-secondary d-flex align-items-center">
+                        <i class="fas fa-layer-group me-2 text-warning"></i>
+                        <small class="text-muted">Basic / Premium required</small>
+                    </span>
+                {% else %}
+                    <!-- Unlocked: either movie is free or user has active plan -->
+                    <a href="{{ url_for('movie.watch', movie_id=movie.id) }}" class="btn btn-danger btn-lg px-5 py-3 shadow">
+                        <i class="fas fa-play me-2"></i>WATCH NOW
+                    </a>
+                    {% if current_user.plan_is_active %}
+                    <a href="{{ url_for('movie.download', movie_id=movie.id) }}" class="btn btn-outline-light btn-lg px-4 py-3">
+                        <i class="fas fa-download me-2"></i>DOWNLOAD
+                    </a>
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-danger btn-lg px-5 py-3 shadow">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login to Watch
+                </a>
+            {% endif %}
+            
+            <button id="watchlistBtn" class="btn btn-dark btn-lg px-4 py-3 border border-secondary shadow-sm" 
+                    data-movie-id="{{ movie.id }}"
+                    title="{% if is_in_watchlist %}Remove from Watch List{% else %}Add to Watch List{% endif %}">
+                <i id="watchlistIcon" class="fas {% if is_in_watchlist %}fa-check text-success{% else %}fa-plus{% endif %}"></i>
             </button>
         </div>
 
@@ -48,7 +82,8 @@
         <div class="card bg-dark border-secondary shadow-sm">
             <div class="card-body p-4">
                 <h5 class="fw-bold mb-3">Rate this Content</h5>
-                <form action="{{ url_for('movie.rate_movie', movie_id=movie.id) }}" method="POST" class="row g-2 align-items-center">
+                <form action="{{ url_for('movie.rate_movie', movie_id=movie.id) }}" method="POST"
+                    class="row g-2 align-items-center">
                     <div class="col-auto">
                         <select name="score" class="form-select bg-black text-white border-secondary">
                             <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
@@ -66,5 +101,18 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const watchlistBtn = document.getElementById('watchlistBtn');
+    if (watchlistBtn) {
+        watchlistBtn.addEventListener('click', function() {
+            const movieId = this.getAttribute('data-movie-id');
+            toggleWatchlistGlobal(movieId, this);
+        });
+    }
+});
+</script>
 {% endblock %}

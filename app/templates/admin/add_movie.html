@@ -7,7 +7,7 @@
         <div class="card bg-dark shadow p-4 border border-secondary">
             <h2 class="mb-4 text-danger fw-bold"><i class="fas fa-plus-circle me-2"></i>Add New Content</h2>
             
-    
+            <!-- IMPORTANT: enctype must be multipart for file uploads -->
             <form method="POST" enctype="multipart/form-data">
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -72,7 +72,7 @@
                     <div class="col-12">
                         <div class="card bg-black p-3 border-secondary">
                             <h6 class="text-muted mb-3">Display Options</h6>
-                            <div class="d-flex gap-4">
+                            <div class="d-flex gap-4 flex-wrap">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="is_featured" id="is_featured">
                                     <label class="form-check-label" for="is_featured">Featured on Home</label>
@@ -80,6 +80,13 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="is_trending" id="is_trending">
                                     <label class="form-check-label" for="is_trending">Mark as Trending</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_premium" id="is_premium">
+                                    <label class="form-check-label" for="is_premium">
+                                        <i class="fas fa-crown text-warning me-1"></i>Premium Content
+                                        <small class="text-muted">(Basic/Premium required)</small>
+                                    </label>
                                 </div>
                             </div>
                         </div>

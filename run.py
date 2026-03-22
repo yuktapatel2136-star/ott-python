@@ -5,10 +5,11 @@ app = create_app()
 
 def init_db():
     with app.app_context():
+        # Create database tables
         db.create_all()
         print("Database tables ensured!")
         
-        # Add default categories
+        # Add default categories if empty
         if Category.query.count() == 0:
             print("Adding default categories...")
             categories = [
@@ -37,4 +38,5 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
+    # Run the Flask app
     app.run(debug=True)
