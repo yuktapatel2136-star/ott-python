@@ -34,6 +34,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+#------Addmin/Dashboard-------------
 @admin_bp.route('/admin/')
 @login_required
 @admin_required
@@ -44,7 +45,7 @@ def dashboard():
     movies = Movie.query.all()
     users = User.query.all()
     
-    # Simple metrics
+    
     most_watched = Movie.query.order_by(Movie.views.desc()).limit(5).all()
     subscribed_users = User.query.filter_by(is_subscribed=True).count()
     simulated_revenue = subscribed_users * 499 
@@ -63,6 +64,7 @@ def dashboard():
                          movies=movies, 
                          users=users)
 
+#--------Add Mvoide--------------
 @admin_bp.route('/admin/add_movie', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -126,6 +128,7 @@ def add_movie():
         
     return render_template('admin/add_movie.html', categories=categories)
 
+#---------Edit Movie-----------
 @admin_bp.route('/admin/edit_movie/<int:movie_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -171,6 +174,7 @@ def edit_movie(movie_id):
         
     return render_template('admin/edit_movie.html', movie=movie, categories=categories)
 
+#------------Delete Movie---------
 @admin_bp.route('/admin/delete_movie/<int:movie_id>')
 @login_required
 @admin_required
@@ -188,6 +192,7 @@ def delete_movie(movie_id):
     flash(f'"{title}" deleted successfully!', 'info')
     return redirect(url_for('admin.dashboard'))
 
+#----------Add Category-------------
 @admin_bp.route('/admin/categories', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -204,6 +209,7 @@ def manage_categories():
     categories = Category.query.all()
     return render_template('admin/categories.html', categories=categories)
 
+#----------Delete Category-------------
 @admin_bp.route('/admin/delete_category/<int:cat_id>')
 @login_required
 @admin_required
@@ -214,8 +220,7 @@ def delete_category(cat_id):
     flash('Category deleted!', 'info')
     return redirect(url_for('admin.manage_categories'))
 
-# ── User Management ──────────────────────────────────────────────────────────
-
+#----------- User Management-------------
 @admin_bp.route('/admin/edit_user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -228,7 +233,7 @@ def edit_user(user_id):
         subscription_plan = request.form.get('subscription_plan', 'free')
         is_subscribed     = subscription_plan in ('basic', 'premium')
 
-        # Check uniqueness (exclude current user)
+        #-----------Edit User---------------
         existing_username = User.query.filter(User.username == username, User.id != user_id).first()
         existing_email    = User.query.filter(User.email == email,    User.id != user_id).first()
 
@@ -264,7 +269,7 @@ def edit_user(user_id):
 
     return render_template('admin/edit_user.html', user=user)
 
-
+#--------------Delete User--------------- 
 @admin_bp.route('/admin/delete_user/<int:user_id>')
 @login_required
 @admin_required

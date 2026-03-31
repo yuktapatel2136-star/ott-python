@@ -15,7 +15,7 @@ class User(db.Model, UserMixin):
     role = db.Column(db.String(10), default='user')  # 'admin' or 'user'
 
     # Subscription fields
-    is_subscribed = db.Column(db.Boolean, default=False)  # kept for backward compat
+    is_subscribed = db.Column(db.Boolean, default=False)
     subscription_plan = db.Column(db.String(20), default='free')  # 'free', 'basic', 'premium'
     subscription_start = db.Column(db.Date, nullable=True)
     subscription_end = db.Column(db.Date, nullable=True)
@@ -58,12 +58,12 @@ class Movie(db.Model):
     video_url = db.Column(db.String(200), nullable=False) 
     thumbnail = db.Column(db.String(200), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
-    category_name = db.Column(db.String(50)) # For backward compatibility/simplicity
+    category_name = db.Column(db.String(50))
     language = db.Column(db.String(30))
     release_year = db.Column(db.Integer)
     is_featured = db.Column(db.Boolean, default=False)
     is_trending = db.Column(db.Boolean, default=False)
-    is_premium = db.Column(db.Boolean, default=False)  # Requires at least Basic plan
+    is_premium = db.Column(db.Boolean, default=False)
     views = db.Column(db.Integer, default=0)
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
     

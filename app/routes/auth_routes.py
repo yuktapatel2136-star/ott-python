@@ -5,6 +5,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 
 auth_bp = Blueprint('auth', __name__)
 
+#-------Registration----------
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -28,7 +29,7 @@ def register():
         new_user = User(username=username, email=email)
         new_user.set_password(password)
         
-        # First user is admin (simple for college projects)
+        # First user is admin 
         if User.query.count() == 0:
             new_user.role = 'admin'
             
@@ -39,6 +40,7 @@ def register():
         
     return render_template('register.html')
 
+#-------Login-----------
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -58,6 +60,7 @@ def login():
             
     return render_template('login.html')
 
+#-------Logout----------
 @auth_bp.route('/logout')
 def logout():
     logout_user()

@@ -1,8 +1,3 @@
-"""
-migrate_subscription.py
-Run once after updating models to add new subscription columns to MySQL.
-Usage: python migrate_subscription.py
-"""
 from app import create_app, db
 from sqlalchemy import text
 
@@ -43,7 +38,7 @@ with app.app_context():
     else:
         print("  ~ movie.is_premium already exists, skipping")
 
-    # ── 3. Enter default data into subscription_plan table ──────────────────────
+    # ── Enter default data into subscription_plan table ──────────────────────
     print("\nChecking subscription_plan table...")
     try:
         # Check if table has data
@@ -52,7 +47,7 @@ with app.app_context():
         
         if count == 0:
             print("Entering default plans (Basic, Premium)...")
-            # Insert plans (Assuming id is auto-increment)
+            # Insert plans
             conn.execute(text("INSERT INTO subscription_plan (name, price, duration_days) VALUES ('Basic', 199.0, 30)"))
             conn.execute(text("INSERT INTO subscription_plan (name, price, duration_days) VALUES ('Premium', 499.0, 30)"))
             conn.commit()
@@ -60,10 +55,9 @@ with app.app_context():
         else:
             print(f"  ~ Plans already exist ({count} records found).")
             
-        # ── 4. Standardize existing user records ────────────────────────────────
+        # ── Standardize existing user records ────────────────────────────────
         print("\nStandardizing user data...")
-        # Mark users as 'premium' if they had the old is_subscribed=True flag
-        # We also set start/end dates for them using MySQL's CURDATE()
+        
         conn.execute(text("""
             UPDATE user SET 
                 subscription_plan = 'premium',
